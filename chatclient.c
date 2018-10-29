@@ -27,6 +27,7 @@
 int portNum;
 char buffer[BUF_SIZE];
 char message[BUF_SIZE];
+char messageToSend[BUF_SIZE];
 char buffer2[BUF_SIZE];
 int i = 0;
 int charsWritten;
@@ -82,6 +83,7 @@ int main(int argc, char *argv[]) {
   printf("Connecting to Server\n");
   if (connect(serverSocket, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {// Connect socket to address
       fprintf(stderr, "chatClient: Error connecting\n");
+      exit(1);
   } else {
       printf("Connected\n");  
   }
@@ -118,16 +120,20 @@ int main(int argc, char *argv[]) {
 
     // printf("Sending %s to the server\n", buffer);
     // Send message to server
-    charsWritten = send(serverSocket, buffer, strlen(buffer), 0); // Write to the server
+    memset(messageToSend, '\0', sizeof(messageToSend));
+    strcpy(messageToSend, clientHandle);
+    strcat(messageToSend, "> ");
+    strcat(messageToSend, buffer);
+    printf("messageToSend: %s\n", messageToSend);
+
+    charsWritten = send(serverSocket, messageToSend, strlen(messageToSend), 0); // Write to the server
     if (charsWritten < 0) {
         fprintf(stderr, "chatClient: Error writing to socket\n");
     }
 
-    if (charsWritten < strlen(buffer)) {
+    if (charsWritten < strlen(messageToSend)) {
         fprintf(stderr, "chatClient: Warning - Not all data written to socket!\n");
     }
-
-
 
     // printf("Getting Return Msg from Server\n");
         // Get return message from server
