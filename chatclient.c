@@ -13,20 +13,21 @@
 #include <netinet/in.h>
 #include <netdb.h> 
 
-#define BUF_SIZE 5000
+#define BUF_SIZE 500
 
 //variables
 int portNum;
 char buffer[BUF_SIZE];
+char message[BUF_SIZE];
 char buffer2[BUF_SIZE];
-int i;
+int i = 0;
 int charsWritten;
 int charsRead;
 int serverSocket;
 char clientHandle[10];
 
 
-struct sockaddr_in serverAddress;
+struct sockaddr_in serv_addr;
 struct hostent* serverHostInfo;
 
 // void error(const char *msg) { 
@@ -37,61 +38,75 @@ struct hostent* serverHostInfo;
 
 int main(int argc, char *argv[]) {
     
-    if (argc < 3) {
-        fprintf(stderr, "Too Few Arguments\n");
-        fflush(stdout);
-        exit(1);
-    } else if (argc > 3) {
-        fprintf(stderr, "Too Many Arguments\n");
-        fflush(stdout);
-        exit(1);
-    }
+  if (argc < 3) {
+      fprintf(stderr, "Too Few Arguments\n");
+      fflush(stdout);
+      exit(1);
+  } else if (argc > 3) {
+      fprintf(stderr, "Too Many Arguments\n");
+      fflush(stdout);
+      exit(1);
+  }
 
-    //store port number
-    portNum = atoi(argv[2]); // final argument is the port entered by user
-    printf("portNum: %d\n", portNum);
+  //store port number
+  portNum = atoi(argv[2]); // final argument is the port entered by user
+  printf("portNum: %d\n", portNum);
 
-    memset((char*)&serverAddress, '\0', sizeof(serverAddress)); // Clear out the address struct
+  memset((char*)&serv_addr, '\0', sizeof(serv_addr)); // Clear out the address struct
 
-    serverAddress.sin_family = AF_INET; // Create a network-capable socket
-    serverAddress.sin_port = htons(portNum); // Store the port number   
-    serverHostInfo = gethostbyname("localhost");  // use localhost as target IP address/host
-    if (serverHostInfo == NULL) {
-    fprintf(stderr, "chatClient: Couldn't connect port # %d\n", portNum);
-    exit(1);
-    } 
+  serv_addr.sin_family = AF_INET; // Create a network-capable socket
+  serv_addr.sin_port = htons(portNum); // Store the port number   
+  serverHostInfo = gethostbyname("localhost");  // use localhost as target IP address/host
+  if (serverHostInfo == NULL) {
+  fprintf(stderr, "chatClient: Couldn't connect port # %d\n", portNum);
+  exit(1);
+  } 
 
-    memcpy((char*)&serverAddress.sin_addr.s_addr, (char*)serverHostInfo->h_addr, serverHostInfo->h_length); // Copy in the address
+  memcpy((char*)&serv_addr.sin_addr.s_addr, (char*)serverHostInfo->h_addr, serverHostInfo->h_length); // Copy in the address
 
-    // Set up the socket
-    serverSocket = socket(AF_INET, SOCK_STREAM, 0); // Create the socket
-    if (serverSocket < 0) {
-        fprintf(stderr, "chatClient: Error opening socket\n");
-    }
+  // Set up the socket
+  serverSocket = socket(AF_INET, SOCK_STREAM, 0); // Create the socket
+  if (serverSocket < 0) {
+      fprintf(stderr, "chatClient: Error opening socket\n");
+  }
 
-    // Connect to server
-    printf("Connecting to Server\n");
-    if (connect(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0) {// Connect socket to address
-        fprintf(stderr, "chatClient: Error connecting\n");
-    } else {
-        printf("Connected\n");  
-    }
+  // Connect to server
+  printf("Connecting to Server\n");
+  if (connect(serverSocket, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {// Connect socket to address
+      fprintf(stderr, "chatClient: Error connecting\n");
+  } else {
+      printf("Connected\n");  
+  }
 
-    // get client handle and store for future use
-    do {
-        printf("Please enter a name less than 10 characters: ");
-        scanf("%s", clientHandle);  
-    } while (strlen(clientHandle) < 1 || strlen(clientHandle) > 9);
+  // get client handle and store for future use
+  do {
+      printf("Please enter a name less than 10 characters: ");
+      i = 0;
+      // (scanf("%s", clientHandle);
+      while((clientHandle[i] = getchar())!='\n') {
+          i++;
+      }
+      clientHandle[i] = '\0';
+      // strcpy(stringToSend, clientHandle);
+  } while (strlen(clientHandle) < 1 || strlen(clientHandle) > 9);
 
-    printf("User Handle: %s\n", clientHandle);
-while(1) {
-    printf("Type something to the server or type '/quit' to exit: ");
-    scanf("%s", buffer);
+    // printf("User Handle: %s\n", clientHandle);
+    // printf("StringToSend: %s\n", stringToSend);
+  printf("Type '\\quit' to exit.\n");
+
+  while(1) {
+    printf("%s> ", clientHandle);
+    i = 0;
+    while((buffer[i] = getchar())!='\n') { 
+            i++;
+        }
+        buffer[i] = '\0';    
+
     if (strcmp(buffer, "\\quit") == 0) {
         printf("Quit Command Received, Closing\n");
         break;
     }
-    printf("Sending %s to the server\n", buffer);
+    // printf("Sending %s to the server\n", buffer);
     // Send message to server
     charsWritten = send(serverSocket, buffer, strlen(buffer), 0); // Write to the server
     if (charsWritten < 0) {
@@ -110,33 +125,13 @@ while(1) {
     if (charsRead < 0) {
         fprintf(stderr, "CLIENT: ERROR reading from socket");
     }
-    printf("CLIENT: I received this from the server: \"%s\"\n", buffer2);
+    // printf("CLIENT: I received this from the server: \"%s\"\n", buffer2);
+    printf("%s\n", buffer2);
 
-    memset(buffer, '\0', sizeof(buffer)); // Clear out the buffer again
-    memset(buffer2, '\0', sizeof(buffer2)); // Clear out the buffer again
-}
-    // // ************************************************************** // 
+    memset(buffer, 0, sizeof(buffer)); // Clear out the buffer again
+    memset(buffer2, 0, sizeof(buffer2)); // Clear out the buffer again
+  }
 
-    //     // Send message to server
-    // charsWritten = send(serverSocket, keyBuffer, strlen(keyBuffer), 0); // Write to the server
-    // if (charsWritten < 0) {
-    //     fprintf(stderr, "otp_enc: Error writing to socket\n");
-    // }
-
-    // if (charsWritten < strlen(keyBuffer)) {
-    //     fprintf(stderr, "otp_enc: Warning - Not all data written to socket!\n");
-    // }
-
-    // // printf("Getting Return Msg from Server\n");
-    //     // Get return message from server
-    // memset(keyBuffer, '\0', sizeof(keyBuffer)); // Clear out the buffer again for reuse
-    // charsRead = recv(serverSocket, keyBuffer, sizeof(keyBuffer) - 1, 0); // Read data from the socket, leaving \0 at end
-    
-    // // printf("Received Data from Socket\n");
-    // if (charsRead < 0) {
-    //     fprintf(stderr, "CLIENT: ERROR reading from socket");
-    // }
-    // printf("%s\n", keyBuffer);
-
-    return 0;
+  close(serverSocket);
+  return 0;
 }
