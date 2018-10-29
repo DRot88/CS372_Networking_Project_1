@@ -1,5 +1,13 @@
-// Beej's Guide to Network Programming has been used as a reference
-// OTP Project from my CS 344 has also been used as a reference
+// Daniel Rotenberg
+// OSU CS 372 Project # 1
+// Due 10/28/18
+
+// References:
+// Beej's Guide to Network Programming 
+// OTP Project from my CS 344 
+// https://stackoverflow.com/questions/31103188/my-python-socket-server-can-only-receive-one-message-from-the-client
+// https://medium.com/@yashitmaheshwary/simple-chat-server-using-sockets-in-c-f72fc8b5b24e
+
 
 #include <stdio.h>
 #include <ctype.h>
@@ -103,9 +111,11 @@ int main(int argc, char *argv[]) {
         buffer[i] = '\0';    
 
     if (strcmp(buffer, "\\quit") == 0) {
+        send(serverSocket, "\\quit", 5, 0);
         printf("Quit Command Received, Closing\n");
         break;
-    }
+    }    
+
     // printf("Sending %s to the server\n", buffer);
     // Send message to server
     charsWritten = send(serverSocket, buffer, strlen(buffer), 0); // Write to the server
@@ -117,6 +127,8 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "chatClient: Warning - Not all data written to socket!\n");
     }
 
+
+
     // printf("Getting Return Msg from Server\n");
         // Get return message from server
     charsRead = recv(serverSocket, buffer2, sizeof(buffer2) - 1, 0); // Read data from the socket, leaving \0 at end
@@ -126,6 +138,10 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "CLIENT: ERROR reading from socket");
     }
     // printf("CLIENT: I received this from the server: \"%s\"\n", buffer2);
+    if (strcmp(buffer2, "\\quit") == 0) {
+        printf("Quit Command Received From Server, Closing\n");
+        break;
+    }       
     printf("%s\n", buffer2);
 
     memset(buffer, 0, sizeof(buffer)); // Clear out the buffer again
