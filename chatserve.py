@@ -1,12 +1,16 @@
-from socket import *
-import sys
+# Daniel Rotenberg
+# OSU CS 372 Project # 1
+# Due 10/28/18
 
-
-BUFFER_SIZE = 501
-
+# References:
 # https://stackoverflow.com/questions/419163/what-does-if-name-main-do
 # https://docs.python.org/release/2.6.5/library/socketserver.html#socketserver-tcpserver-example
 # https://docs.python.org/2/library/socket.html
+
+from socket import *
+import sys
+
+BUFFER_SIZE = 501
 
 if __name__ == "__main__":
   if len(sys.argv) != 2:  # Make sure correct number of arguments
@@ -49,12 +53,3 @@ if __name__ == "__main__":
   except KeyboardInterrupt:
     print ("\nKeyboard Interrupt: Exiting Chat")
     sys.exit()
-
-  #   sentence = connectSocket.recv(BUFFER_SIZE)
-  #   print(sentence.decode('utf-8'))
-  #   capitalizedSentence = "chatServe > %s" % (sentence.upper())     
-  #   connectSocket.send(capitalizedSentence.encode('utf-8'))   
-  #   sentence = ''  
-  #   connectSocket.close()
-
-

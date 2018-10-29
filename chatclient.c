@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
 
   serv_addr.sin_family = AF_INET; // Create a network-capable socket
   serv_addr.sin_port = htons(portNum); // Store the port number   
-  serverHostInfo = gethostbyname("localhost");  // use localhost as target IP address/host
+  serverHostInfo = gethostbyname(argv[1]);  // use argument as target IP address/host
   if (serverHostInfo == NULL) {
   fprintf(stderr, "chatClient: Couldn't connect port # %d\n", portNum);
   exit(1);
@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
     strcpy(messageToSend, clientHandle);
     strcat(messageToSend, "> ");
     strcat(messageToSend, buffer);
-    printf("messageToSend: %s\n", messageToSend);
+    // printf("messageToSend: %s\n", messageToSend);
 
     charsWritten = send(serverSocket, messageToSend, strlen(messageToSend), 0); // Write to the server
     if (charsWritten < 0) {
